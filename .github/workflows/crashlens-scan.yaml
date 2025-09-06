@@ -30,16 +30,19 @@ jobs:
           if [ ! -f llm_logs/sample1.jsonl ]; then
             echo '{"request": "Test API request", "response": "Test API response", "metadata": {"user": "test"}}' > llm_logs/sample1.jsonl
           fi
-          echo "Contents of llm_logs:"
+          echo "Contents of llm_logs folder:"
           ls -la llm_logs
 
-      # Run CrashLens scan safely
+      # Run CrashLens scan safely (capture all output and ignore exit code)
       - name: Run CrashLens scan
         id: crashlens
         shell: bash
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
         run: |
+          echo "Starting CrashLens scan..."
+          
+          # Run scan and capture stdout + stderr
           crashlens scan \
             --config .github/crashlens.yml \
             --log-dir ./llm_logs \
@@ -50,9 +53,10 @@ jobs:
             --severity-threshold high \
             > crashlens-result.json 2>&1 || true
 
+          # Debug: show contents and directory
           echo "CrashLens output file contents:"
-          cat crashlens-result.json
-          echo "Files after scan:"
+          cat crashlens-result.json || echo "File does not exist"
+          echo "Files in repo after scan:"
           ls -la
 
       # Upload result artifact
