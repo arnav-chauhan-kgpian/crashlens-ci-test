@@ -1,0 +1,40 @@
+name: LLM Cost & Security Scan
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install CrashLens
+        run: |
+          python -m pip install --upgrade pip
+          pip install crashlens==<PINNED_VERSION>
+      - name: Run CrashLens scan
+        id: crashlens
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
+        run: |
+          crashlens scan \
+            --config .github/crashlens.yml \
+            --log-dir ./llm_logs \
+            --log-paths "llm_logs/**/*.jsonl" \
+            --format json \
+            --fail-on-violations \
+            --policy-template all \
+            --severity-threshold high \
+            > crashlens-result.json || true
+          cat crashlens-result.json
+      - name: Upload CrashLens Result
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: crashlens-results-${{ github.run_number }}
+          path: crashlens-result.json
