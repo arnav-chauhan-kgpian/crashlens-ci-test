@@ -9,19 +9,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
       - name: Install CrashLens
         run: |
           python -m pip install --upgrade pip
           pip install crashlens==<PINNED_VERSION>
+
+      # Debug: check logs folder exists
+      - name: List log files
+        run: |
+          echo "Listing llm_logs folder:"
+          ls -la llm_logs || echo "Folder does not exist"
+
       - name: Run CrashLens scan
         id: crashlens
+        shell: bash
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
         run: |
+          # Ensure crashlens-result.json is always created
           crashlens scan \
             --config .github/crashlens.yml \
             --log-dir ./llm_logs \
@@ -30,8 +41,14 @@ jobs:
             --fail-on-violations \
             --policy-template all \
             --severity-threshold high \
-            > crashlens-result.json || true
+            > crashlens-result.json 2>&1 || true
+
+          # Debug
+          echo "CrashLens output file contents:"
           cat crashlens-result.json
+          echo "Files in repo after scan:"
+          ls -la
+
       - name: Upload CrashLens Result
         uses: actions/upload-artifact@v4
         if: always()
