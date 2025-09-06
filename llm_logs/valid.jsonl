@@ -1,0 +1,1 @@
+{"traceId":"t1","route":"agent/summarize","startTime":"2025-08-10T12:00:00Z","endTime":"2025-08-10T12:00:01Z","input":{"model":"gpt-3.5-turbo","prompt":"Summarize the report"},"usage":{"prompt_tokens":30,"completion_tokens":200},"output":"Short summary...","status":"success"}
