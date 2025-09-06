@@ -8,20 +8,41 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
+      # Checkout code
       - uses: actions/checkout@v4
+
+      # Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
+      # Install CrashLens
       - name: Install CrashLens
         run: |
           python -m pip install --upgrade pip
           pip install crashlens==<PINNED_VERSION>
+
+      # Ensure llm_logs folder exists and has at least one dummy .jsonl file
+      - name: Prepare llm_logs folder
+        run: |
+          mkdir -p llm_logs
+          if [ ! -f llm_logs/sample1.jsonl ]; then
+            echo '{"request": "Test API request", "response": "Test API response", "metadata": {"user": "test"}}' > llm_logs/sample1.jsonl
+          fi
+          echo "Contents of llm_logs folder:"
+          ls -la llm_logs
+
+      # Run CrashLens scan safely (capture all output and ignore exit code)
       - name: Run CrashLens scan
         id: crashlens
+        shell: bash
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
         run: |
+          echo "Starting CrashLens scan..."
+          
+          # Run scan and capture stdout + stderr
           crashlens scan \
             --config .github/crashlens.yml \
             --log-dir ./llm_logs \
@@ -30,10 +51,17 @@ jobs:
             --fail-on-violations \
             --policy-template all \
             --severity-threshold high \
-            > crashlens-result.json || true
-          cat crashlens-result.json
+            > crashlens-result.json 2>&1 || true
+
+          # Debug: show contents and directory
+          echo "CrashLens output file contents:"
+          cat crashlens-result.json || echo "File does not exist"
+          echo "Files in repo after scan:"
+          ls -la
+
+      # Upload result artifact
       - name: Upload CrashLens Result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: crashlens-results-${{ github.run_number }}
