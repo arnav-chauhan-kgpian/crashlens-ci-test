@@ -1,0 +1,1 @@
+{"traceId":"t-dis","route":"agent/translation","input":{"model":"gpt-4o","prompt":"Translate 'hello'"},"usage":{"completion_tokens":10},"status":"success"}

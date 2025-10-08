@@ -1,0 +1,17 @@
+# .github/crashlens.yml
+
+# Global settings
+severity_threshold: "low"
+policy_template: "all"
+fail_on_violations: True
+output_format: "markdown"
+
+# Custom policies
+policies:
+  - name: max-output-tokens-for-summarization
+    description: "Flag when summarization LLM calls exceed 500 completion tokens"
+    match:
+      operation: summarization
+    condition: completion_tokens > 500
+    severity: high
+    action: fail
