@@ -16,7 +16,7 @@ jobs:
       - name: Install CrashLens
         run: |
           python -m pip install --upgrade pip
-          pip install crashlens==<PINNED_VERSION>
+          pip install -U crashlens
       - name: Run CrashLens scan
         id: crashlens
         env:
