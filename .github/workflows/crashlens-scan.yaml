@@ -16,7 +16,7 @@ jobs:
       - name: Install CrashLens
         run: |
           python -m pip install --upgrade pip
-          pip install -U crashlens
+          pip install git+https://github.com/Crashlens/crashlens.git@main
       - name: Run CrashLens scan
         id: crashlens
         env:
