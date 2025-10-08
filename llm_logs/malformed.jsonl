@@ -1,0 +1,3 @@
+{"traceId":"t-ok","input":{"model":"gpt-3.5"}}
+{ this is not valid json
+{"traceId":"t2","input":{"model":"gpt-3.5"}}

@@ -1,0 +1,1 @@
+{"traceId":"t-token","route":"agent/summarization","input":{"model":"gpt-3.5","prompt":"..."},"usage":{"completion_tokens":1200,"prompt_tokens":50},"status":"success"}
