@@ -11,12 +11,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+        with: 
+          python-version: '3.12'
       - name: Install CrashLens
         run: |
           python -m pip install --upgrade pip
-          pip install crashlens==<PINNED_VERSION>
+          pip install git+https://github.com/Crashlens/crashlens.git@main
       - name: Run CrashLens scan
         id: crashlens
         env:
@@ -33,7 +33,7 @@ jobs:
             > crashlens-result.json || true
           cat crashlens-result.json
       - name: Upload CrashLens Result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: crashlens-results-${{ github.run_number }}
